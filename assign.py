@@ -1,17 +1,37 @@
-import os
-import google.generativeai as genai
+import requests
 
-# Directly set the API key or retrieve it from an environment variable
-API_KEY = "AIzaSyDQNXV3aiIx4rSyz5JeaCsByknalpr5FGw"
+API_KEY = "sk_test_4644dce53d1d322fb431eea1b4ce7659f13c3b50"
 
-# Configure the generative AI with the API key
-genai.configure(api_key=API_KEY)
+url = "https://api.paystack.co/bank/validate"
 
-# Initialize the model
-model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+headers = {
+    'Authorization': f'Bearer {API_KEY}',
+    'Content-Type': 'application/json'
+}
 
-# Generate content based on the prompt
-response = model.generate_content("Write a story about an AI and magic")
+# User inputs
+user_name = input("Enter your name: ")
+account_number = input("Enter your account number: ")
 
-# Print the response
-print(response.text)
+data = {
+    "bank_code": "632005",  # Replace with actual bank code if needed
+    "country_code": "ZA",
+    "account_number": account_number,
+    "account_name": user_name,
+    "account_type": "personal",
+    "document_type": "identityNumber",
+    "document_number": "1234567890123"  # Replace with actual document number if needed
+}
+
+response = requests.post(url, headers=headers, json=data)
+
+if response.status_code == 200:
+    try:
+        data = response.json()
+        bank_code = data.get("bank_code", "Bank code not found")
+        print(f"Hello {user_name}, your bank code is: {bank_code}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+else:
+    print(f"Request failed with status code {response.status_code}")
+    print(response.text)
